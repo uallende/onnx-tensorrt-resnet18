@@ -47,6 +47,8 @@ class TRTInference:
                 image = Image.open(img_full_path)
                 img = image.resize((self.input_shape[2], self.input_shape[3]), Image.NEAREST)
                 img_np = np.array(img).astype(np.float32) / 255.0
+                # print(img_np.shape)
+                img_np = img_np.transpose((2,0,1)) 
                 img_np = np.expand_dims(img_np, axis=0)
                 img_list.append(img_np)
                 img_path.append(img_full_path)
@@ -71,10 +73,10 @@ class TRTInference:
         for inputs, full_img_path in zip(input_list, full_img_paths):
             inputs = np.ascontiguousarray(inputs)
             outputs = np.empty(self.output_shape)
+
             d_inputs = cuda.mem_alloc(inputs.nbytes)
             d_outputs = cuda.mem_alloc(outputs.nbytes)
             bindings = [d_inputs, d_outputs]
-
             cuda.memcpy_htod(d_inputs, inputs)
             self.context.execute_v2(bindings)
             cuda.memcpy_dtoh(outputs, d_outputs)
@@ -84,12 +86,12 @@ class TRTInference:
             d_inputs.free()
             d_outputs.free()
 
-            results.append(results)
+            results.append(result)
             self.display_recognized_images(full_img_path, result)
 
         return results      
     
-    def display_recognized_images(self, image_path, class_label):
+    def display_recognized_images(self, image_path, class_label): # NOT WORKING TO FIX
 
         image = Image.open(image_path)
 

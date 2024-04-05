@@ -1,23 +1,7 @@
-'''
-    Target: TensorRT conversion
-    model: Resnet 18
-    Image Resolution: [1,3,224,224]
-    Tensorrt: 8.5.1
-    Python3: OOP Metholology
-'''
-
 import tensorrt as trt
-
 
 class TensorRTConversion:
 
-    '''
-        path : to onnx
-        path : to engine
-        maxworkspace : gb < 1gb
-        precision : 16 float and half precision
-        Inference mode: Dynamic Batch [1, 10, 20]
-    '''
     def __init__(self, path_to_onnx, path_to_engine, max_workspace_size=1 << 30, half_precision=False):
 
         self.TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
@@ -26,14 +10,6 @@ class TensorRTConversion:
         self.max_workspace_size = max_workspace_size
         self.half_precision = half_precision
 
-    '''
-        { INIT BUILD
-        INIT CONFIG
-        INIT EXPLICIT BATCH 
-        INIT NETWORK }
-        Tensorrt >= 8.0.0
- 
-    '''
     def convert(self):
         builder = trt.Builder(self.TRT_LOGGER )
         config = builder.create_builder_config()
@@ -50,13 +26,14 @@ class TensorRTConversion:
 
                 return None
     
-
-       # config.add_optimization_profile(profile)
         print('Successfully TensorRT Engine Configured to Max Batch ')
         print('\n')
 
         if builder.platform_has_fast_fp16:
             config.set_flag(trt.BuilderFlag.FP16)
+
+        else:
+            print(f'Warning: FP16 not supported on this platform')
 
         engine = builder.build_engine(network,config)
 
@@ -66,7 +43,5 @@ class TensorRTConversion:
         print("Successfully Converted ONNX to Tensorrt Dynamic Engine")
         print(f'Serialized engine saved in engine path: {self.path_to_engine}')
 
-# INIT Class
 convert = TensorRTConversion('/workdir/resnet18/resnet18.onnx', '/workdir/resnet18/resnet.engine')
-# Call Class method
 convert.convert()
