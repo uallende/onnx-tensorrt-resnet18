@@ -7,6 +7,10 @@ import cv2
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from torchvision.io import read_image
+import torchvision.transforms as v1
+import torch
+
 
 from PIL import Image
 
@@ -42,18 +46,27 @@ class TRTInference:
 
         for img_original in os.listdir(original_images_path):
             if img_original.endswith('.jpg') or img_original.endswith('.png') or img_original.endswith('.jpeg'):
-                img_full_path = os.path.join(original_images_path, img_original)
 
+                img_full_path = os.path.join(original_images_path, img_original)
                 image = Image.open(img_full_path)
-                img = image.resize((self.input_shape[2], self.input_shape[3]), Image.NEAREST)
+
+                img = image.resize((244,244), Image.NEAREST)
                 img_np = np.array(img).astype(np.float32) / 255.0
-                # print(img_np.shape)
                 img_np = img_np.transpose((2,0,1)) 
                 img_np = np.expand_dims(img_np, axis=0)
+                self.save_image_to_plot(self, img_np, img_original)
                 img_list.append(img_np)
                 img_path.append(img_full_path)
 
         return img_list, img_path
+    
+    def save_image_to_plot(self, img_np, img_original):
+
+        img_to_plot = img_np.squeeze().transpose((1, 2, 0))  # Remove extra dimensions and rearrange to (height, width, channels)
+        plt.imshow(img_to_plot)
+        plt.show()
+        plt.imshow(img_to_plot)
+        plt.savefig(f'/workdir/resnet18/images_plot/{img_original}.png')
     
     def post_process_img(self, outputs):
 
@@ -62,6 +75,7 @@ class TRTInference:
         for output in outputs:
             class_idx = output.argmax()
             print(f'Class Detected:', self.class_labels[class_idx])
+            class_indices.append(class_idx)
         
         return class_indices
     
@@ -91,38 +105,37 @@ class TRTInference:
 
         return results      
     
-    def display_recognized_images(self, image_path, class_label): # NOT WORKING TO FIX
+    def display_recognized_images(self, image_path, class_labels): # NOT WORKING TO FIX
 
         image = Image.open(image_path)
 
-        for class_name in class_label:
+        for class_idx in class_labels:
 
             path_to_detected_imgs = '/workdir/resnet18/images_detected'
 
             if not os.path.exists(path_to_detected_imgs):
                 os.mkdir(path_to_detected_imgs)
 
-            plt.imgshow(image)
-            plt.title(f'Recognized Image : {class_name}')
+            plt.imshow(image)
+            plt.title(f'Recognized Image : {self.class_labels[class_idx]}')
             plt.axis('off')
 
-            save_img = os.path.join(path_to_detected_imgs, f'{class_name}.jpg')
+            save_img = os.path.join(path_to_detected_imgs, f'{self.class_labels[class_idx]}.jpg')
             plt.savefig(save_img)
             plt.close()
 
             return image, save_img
         
-engine_file_path = '/workdir/resnet18/resnet.engine'        
-engine_file_path = '/workdir/resnet18/resnettrt.engine'        
+# engine_file_path = '/workdir/resnet18/trt_engines/resnet.engine'        
+# engine_file_path = '/workdir/resnet18/trt_engines/resnettrt.engine'        
+engine_file_path = '/workdir/resnet18/trt_engines/torch_model_trt.engine'
 
 input_shape = (1,3,224,224)
 output_shape = (1,1000)
 path_to_original_imgs = 'resnet18/images'
 class_labels = '/workdir/resnet18/imagenet-classes.txt'
 
-# print(os.getcwd())
-# print(os.listdir(path_to_original_imgs))
-# # exit()
+
 inference = TRTInference(engine_file_path=engine_file_path, 
                          input_shape=input_shape, 
                          output_shape=output_shape,

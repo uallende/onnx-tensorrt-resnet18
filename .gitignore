@@ -1,2 +1,7 @@
 images
 images/
+images_plot
+images_plot/
+images_detected
+trt_engines
+/workdir/torch2trt
