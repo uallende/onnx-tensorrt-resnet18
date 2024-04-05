@@ -3,7 +3,7 @@
 import tensorrt as trt
 import pycuda.autoinit
 import pycuda.driver as cuda
-# import cv2
+import cv2
 import numpy as np
 import os
 import matplotlib.pyplot as plt
