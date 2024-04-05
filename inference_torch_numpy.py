@@ -40,11 +40,7 @@ for np_image in img_list:
     label = torch.argmax(model(ts_image))
     print(f'Prediction: {labels[label]}')
 
-
-
 # print(img_path)
-
-
 # output = model(image)
 # class_output = torch.argmax(output)
 # print(f'{image_path} -------- {labels[class_output]}')

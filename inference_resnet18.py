@@ -113,6 +113,8 @@ class TRTInference:
             return image, save_img
         
 engine_file_path = '/workdir/resnet18/resnet.engine'        
+engine_file_path = '/workdir/resnet18/resnettrt.engine'        
+
 input_shape = (1,3,224,224)
 output_shape = (1,1000)
 path_to_original_imgs = 'resnet18/images'
