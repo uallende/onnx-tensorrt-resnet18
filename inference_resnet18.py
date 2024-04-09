@@ -54,7 +54,7 @@ class TRTInference:
                 img_np = np.array(img).astype(np.float32) / 255.0
                 img_np = img_np.transpose((2,0,1)) 
                 img_np = np.expand_dims(img_np, axis=0)
-                self.save_image_to_plot(self, img_np, img_original)
+                self.save_image_to_plot(img_np, img_original)
                 img_list.append(img_np)
                 img_path.append(img_full_path)
 
@@ -63,8 +63,6 @@ class TRTInference:
     def save_image_to_plot(self, img_np, img_original):
 
         img_to_plot = img_np.squeeze().transpose((1, 2, 0))  # Remove extra dimensions and rearrange to (height, width, channels)
-        plt.imshow(img_to_plot)
-        plt.show()
         plt.imshow(img_to_plot)
         plt.savefig(f'/workdir/resnet18/images_plot/{img_original}.png')
     
@@ -85,6 +83,7 @@ class TRTInference:
         results = []
 
         for inputs, full_img_path in zip(input_list, full_img_paths):
+
             inputs = np.ascontiguousarray(inputs)
             outputs = np.empty(self.output_shape)
 
@@ -126,9 +125,9 @@ class TRTInference:
 
             return image, save_img
         
-# engine_file_path = '/workdir/resnet18/trt_engines/resnet.engine'        
+engine_file_path = '/workdir/resnet18/trt_engines/resnet.engine'        
 # engine_file_path = '/workdir/resnet18/trt_engines/resnettrt.engine'        
-engine_file_path = '/workdir/resnet18/trt_engines/torch_model_trt.engine'
+# engine_file_path = '/workdir/resnet18/trt_engines/torch_model_trt.engine'
 
 input_shape = (1,3,224,224)
 output_shape = (1,1000)
